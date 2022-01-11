@@ -1,7 +1,6 @@
 import requests
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, flash
 import psycopg2
-
 app = Flask(__name__)
 
 conn = psycopg2.connect(database="service_db",
@@ -33,19 +32,22 @@ def login():
     return render_template('login.html')
 
 
+
 @app.route('/registration/', methods=['POST', 'GET'])
 def registration():
     if request.method == 'POST':
         name = request.form.get('name')
         login = request.form.get('login')
         password = request.form.get('password')
-        if name and login and password:
+        try:
+            cursor.execute(f"SELECT * FROM service.users WHERE login='{login}'")
+            records = list(cursor.fetchall())
+            return render_template('registration.html', oops=True,  full_name=records[0][1], login=records[0][2], password=records[0][3])
+        except:
             cursor.execute('INSERT INTO service.users (full_name, login, password) VALUES (%s, %s, %s);',
-                        (str(name), str(login), str(password)))
+                       (str(name), str(login), str(password)))
             conn.commit()
 
             return redirect('/login/')
-        else:
-            return '<p> Empty registration fields <p>'
+
     return render_template('registration.html')
-app.run()

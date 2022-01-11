@@ -5,6 +5,9 @@
     <title>Login</title>
 </head>
 <body>
+	{% if oops %}
+        <p style="color:red;">User is not found in DB</p>
+	{% endif %}
     <form action="" method="post">
         <p>
      <label for="username">Username</label>
